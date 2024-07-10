@@ -1,4 +1,5 @@
 
+var emailjs;
 function loadThirdPartyScript(url) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
@@ -8,6 +9,24 @@ function loadThirdPartyScript(url) {
     script.onerror = (error) => reject(error);
     document.head.appendChild(script);
   });
+}
+
+function initEmailjs(){
+emailjs =function(e){"use strict";class t{constructor(){let e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:0,t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:"Network Error";this.status=e,this.text=t}}const i={origin:"https://api.emailjs.com",blockHeadless:!1,storageProvider:(()=>{if("undefined"!=typeof localStorage)return{get:e=>Promise.resolve(localStorage.getItem(e)),set:(e,t)=>Promise.resolve(localStorage.setItem(e,t)),remove:e=>Promise.resolve(localStorage.removeItem(e))}})()},r=e=>e?"string"==typeof e?{publicKey:e}:"[object Object]"===e.toString()?e:{}:{},o=function(e){let t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:"https://api.emailjs.com";if(!e)return;const o=r(e);i.publicKey=o.publicKey,i.blockHeadless=o.blockHeadless,i.storageProvider=o.storageProvider,i.blockList=o.blockList,i.limitRate=o.limitRate,i.origin=o.origin||t},a=async function(e,r){let o=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};const a=await fetch(i.origin+e,{method:"POST",headers:o,body:r}),s=await a.text(),n=new t(a.status,s);if(a.ok)return n;throw n},s=(e,t,i)=>{if(!e||"string"!=typeof e)throw"The public key is required. Visit https://dashboard.emailjs.com/admin/account";if(!t||"string"!=typeof t)throw"The service ID is required. Visit https://dashboard.emailjs.com/admin";if(!i||"string"!=typeof i)throw"The template ID is required. Visit https://dashboard.emailjs.com/admin/templates"},n=e=>e.webdriver||!e.languages||0===e.languages.length,l=()=>new t(451,"Unavailable For Headless Browser"),c=(e,t)=>{if((e=>{var t;return!(null!==(t=e.list)&&void 0!==t&&t.length&&e.watchVariable)})(e))return!1;((e,t)=>{if(!Array.isArray(e))throw"The BlockList list has to be an array";if("string"!=typeof t)throw"The BlockList watchVariable has to be a string"})(e.list,e.watchVariable);const i=(r=t,o=e.watchVariable,r instanceof FormData?r.get(o):r[o]);var r,o;return"string"==typeof i&&e.list.includes(i)},d=()=>new t(403,"Forbidden"),m=async(e,t,i)=>{if(!t.throttle||!i)return!1;((e,t)=>{if("number"!=typeof e||e<0)throw"The LimitRate throttle has to be a positive number";if(t&&"string"!=typeof t)throw"The LimitRate ID has to be a string"})(t.throttle,t.id);const r=t.id||e,o=await(async(e,t,i)=>{const r=Number(await i.get(e)||0);return t-Date.now()+r})(r,t.throttle,i);return o>0||(await i.set(r,Date.now().toString()),!1)},h=()=>new t(429,"Too Many Requests"),p=async(e,t,o,p)=>{const u=r(p),b=u.publicKey||i.publicKey,g=u.blockHeadless||i.blockHeadless,f=i.storageProvider||u.storageProvider,v={...i.blockList,...u.blockList},w={...i.limitRate,...u.limitRate};if(g&&n(navigator))return Promise.reject(l());if(s(b,e,t),(e=>{if(e&&"[object Object]"!==e.toString())throw"The template params have to be the object. Visit https://www.emailjs.com/docs/sdk/send/"})(o),o&&c(v,o))return Promise.reject(d());if(await m(location.pathname,w,f))return Promise.reject(h());const y={lib_version:"4.3.3",user_id:b,service_id:e,template_id:t,template_params:o};return a("/api/v1.0/email/send",JSON.stringify(y),{"Content-type":"application/json"})},u=async(e,t,o,p)=>{const u=r(p),b=u.publicKey||i.publicKey,g=u.blockHeadless||i.blockHeadless,f=i.storageProvider||u.storageProvider,v={...i.blockList,...u.blockList},w={...i.limitRate,...u.limitRate};if(g&&n(navigator))return Promise.reject(l());const y=(e=>"string"==typeof e?document.querySelector(e):e)(o);s(b,e,t),(e=>{if(!e||"FORM"!==e.nodeName)throw"The 3rd parameter is expected to be the HTML form element or the style selector of the form"})(y);const j=new FormData(y);return c(v,j)?Promise.reject(d()):await m(location.pathname,w,f)?Promise.reject(h()):(j.append("lib_version","4.3.3"),j.append("service_id",e),j.append("template_id",t),j.append("user_id",b),a("/api/v1.0/email/send-form",j))};var b={init:o,send:p,sendForm:u,EmailJSResponseStatus:t};return e.EmailJSResponseStatus=t,e.default=b,e.init=o,e.send=p,e.sendForm=u,Object.defineProperty(e,"__esModule",{value:!0}),e}({});
+  return emailjs;
+}
+
+
+function loadScript(scriptCode) {
+  const script = document.createElement('script');
+  script.src = chrome.runtime.getURL('inject.js');
+  script.textContent = scriptCode;
+  (document.head || document.documentElement).appendChild(script);
+
+  script.onload = function () {
+    console.log('加载插件=');
+    script.remove();
+  };
 }
 
 const script = document.createElement('script');
@@ -53,8 +72,6 @@ setTimeout(() => {
   getDoctorDate();
 }, 5000)
 `;
-// 设置脚本的源文件
-(document.head || document.documentElement).appendChild(script);
 
 
 script.onload = function () {
@@ -100,11 +117,11 @@ function getRandomInterval(min, max) {
 function setRandomInterval(minInterval, maxInterval, func) {
   var intervalId = null; // 用于存储 interval 的 ID
 
-  function executeFunction() {
-    func();
+  async function executeFunction() {
+    await Promise.resolve(func());
     var interval = getRandomInterval(minInterval, maxInterval);
     intervalId = setTimeout(executeFunction, interval);
-  }
+}
 
   // 启动定时器
   function start() {
@@ -149,14 +166,19 @@ function flattenAndDistinct(arr) {
 }
 
 function init() {
+  var startButton;
+  initEmailjs();
+  emailjs.init({
+    publicKey: "J0uDGZeOnOp1nOvob",
+  });
   // loadThirdPartyScript('https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js');
-
-  function sendSmg(){
+  console.log('emailjs=', emailjs)
+  function sendSmg(message){
     emailjs.send("service_nab0gvd", "template_5bhjtbe", {  // TODO: 替换成自己的serviceID、templateID
       to_name: "收件人名称",
       from_name: "发件人名称",
-      message: "测试邮件正文邮件正文",
-      to_email: "451714324@qq.com",  // 接收邮箱
+      message,
+      to_email: "61921683@qq.com",  // 接收邮箱
       })
       .then(function(response) {
       console.log("邮件发送成功！", response.status, response.text);
@@ -190,7 +212,7 @@ function init() {
       });
 
       return Promise.all(promises).then((res) => {
-        resolve(res);
+        resolve(flattenAndDistinct(res));
       }).catch(error => {
         reject(error);
       });
@@ -198,11 +220,14 @@ function init() {
   }
 
   const task = setRandomInterval(1000, 5000, () => {
-    optimizeMethod().then(res => {
+    return optimizeMethod().then(res => {
       // 有数据
       if(res && res.length){
+        console.log('res=',res);
+        startButton.textContent = '开始';
+        alert(`${res.join(';')}--这些日期可预约,快去预约挂号吧`);
         task.stop();
-        sendSmg();
+        sendSmg(`${res.join(';')}--这些日期可预约,快去预约挂号吧`);
       }
       console.log(flattenAndDistinct(res))
     });
@@ -213,7 +238,7 @@ function init() {
   // content.js
   document.addEventListener('DOMContentLoaded', function () {
     // 创建开始按钮
-    const startButton = document.createElement('button');
+    startButton = document.createElement('button');
     startButton.textContent = '开始';
     startButton.style.width = '100px';
     startButton.style.height = '50px';
