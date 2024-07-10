@@ -1,0 +1,26 @@
+{
+    "manifest_version": 3,
+    "name": "Change User Agent",
+    "version": "1.0",
+    "description": "A Chrome extension to change the user agent",
+    "permissions": [
+        "activeTab"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_start"
+        }
+    ]
+}
